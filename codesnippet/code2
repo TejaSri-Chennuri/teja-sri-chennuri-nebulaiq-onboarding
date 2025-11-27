@@ -1,1 +1,17 @@
+append payload to buffer
+if "\r\n\r\n" not found -> wait (or trim)
+else:
+  header_block = buffer up to "\r\n\r\n"
+  parse request-line -> method, path, version
+  parse headers -> map
+  if Content-Length:
+     if buffer has full body -> extract
+     else -> wait
+  elif chunked:
+     decode chunks (or wait)
+  else:
+     body_len = 0
+  emit request metadata + timestamp
+  consume bytes from buffer
+  loop for pipelined requests
 
