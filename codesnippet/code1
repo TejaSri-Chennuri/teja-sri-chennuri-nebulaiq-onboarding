@@ -1,1 +1,30 @@
+FUNCTION ParseSSDPOacket(raw_bytes):
+    CRLF = "\r\n"
+    DOUBLE_CRLF = "\r\n\r\n"
+    IF "HTTP/1.1" NOT IN raw_bytes:
+        RETURN "Error: Unknown Protocol"
+    end_of_headers_index = FIND(raw_bytes, DOUBLE_CRLF)
 
+    IF end_of_headers_index == -1:
+        RETURN "Status: Incomplete Packet (Buffering...)"
+    header_block = SUBSTRING(raw_bytes, 0, end_of_headers_index)
+    lines = SPLIT(header_block, CRLF)
+    request_line_parts = SPLIT(lines[0], " ")
+    
+    method = request_line_parts[0]   # Value: "M-SEARCH"
+    uri    = request_line_parts[1]   # Value: "*"
+    proto  = request_line_parts[2]   # Value: "HTTP/1.1"
+    headers_map = {}
+    
+    FOR each line IN lines[1 to END]:
+        parts = SPLIT(line, ": ", limit=1)
+        key = parts[0]
+        value = parts[1]
+        
+        headers_map[key] = value
+    RETURN {
+        "type": "SSDP_DISCOVERY",
+        "method": method,
+        "target_host": headers_map["HOST"],
+        "man_header": headers_map["MAN"]
+    }
