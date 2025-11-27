@@ -1,1 +1,13 @@
+while len(buffer) >= 4:
+  length = read3LE(buffer[0:3])
+  if len(buffer) < 4 + length: wait
+  payload = buffer[4:4+length]
+  if client and payload[0] == 0x03:
+     sql = payload[1:]
+     emit mysql_query(sql)
+  elif server:
+     if payload[0] == 0x00 -> OK
+     elif payload[0] == 0xFF -> ERR
+     else -> resultset frame (stream/metadata)
+  consume 4+length bytes from buffer
 
